@@ -1,0 +1,17 @@
+5.het
+-> GUI
+-> Tensorflow CNN(képfelismerés) - classification
+-> openCV (feeling detection)
+6.het
+-> GUI
+-> Tensorflow CNN(képfelismerés) - elmélet(object detection)
+-> openCV (feeling detection)
+7.het
+-> GUI
+8.het
+-> Tensorflow CNN(képfelismerés) - implementáció
+-> GUI
+9.het
+-> Tensorflow CNN(képfelismerés) - implementáció
+10.het
+...
