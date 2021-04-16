@@ -4,12 +4,17 @@ from PyQt5.QtWidgets import QFileDialog, QLabel
 
 import cv2 as cv
 
+from main_menu import *
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(760, 610)
         MainWindow.setStyleSheet("background-color: #252525")
+
+        self.currentlyPresentedImageURL = None
+
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.image = QtWidgets.QLabel(self.centralwidget)
@@ -199,6 +204,7 @@ class Ui_MainWindow(object):
         self.minNeighborsPlusButton.clicked.connect(self.minNeighborsPlus)
         self.minNeighborsMinusButton.clicked.connect(self.minNeighborsMinus)
 
+        self.backToMenuButton.clicked.connect(self.bactToMainMenu)
         #
 
         self.retranslateUi(MainWindow)
@@ -219,6 +225,15 @@ class Ui_MainWindow(object):
         self.bodyButton.setText(_translate("MainWindow", "Body"))
         self.smileButton.setText(_translate("MainWindow", "Smile"))
         self.backToMenuButton.setText(_translate("MainWindow", "Back To Menu"))
+
+    def bactToMainMenu(self):
+        print("Back")
+        u = Ui_MainMenu()
+        u.setupUi(MainWindow)
+        MainWindow.show()
+
+
+
 
     def resizeImage(self, width, height):
         new_width, new_height, multiplier = 0, 0, 0
@@ -282,41 +297,45 @@ class Ui_MainWindow(object):
             elem = int(self.minNeighborsLineEdit.text()) - 1
             self.minNeighborsLineEdit.setText(elem.__str__())
 
-
     def openFile(self):
         print("Open File")
-        file_name, _ = QFileDialog.getOpenFileName(None, 'Open Image File', r"C:\\Users\\Tomi\\Desktop\\alkalmazottMI",
+        file_name, _ = QFileDialog.getOpenFileName(None, 'Open Image File', r"D:\\Python_projects\\ONLABOR\\UI_Poject",
                                                    "Image files (*.jpg *.jpeg *.gif)")
-        pixmap = QPixmap(file_name)
-        temp_w = pixmap.width()
-        temp_h = pixmap.height()
-        print("width: " + str(temp_w))
-        print("height: " + str(temp_h))
-        temp_w, temp_h = self.resizeImage(pixmap.width(), pixmap.height())
-        print("After resize")
-        print("width: " + str(temp_w))
-        print("height: " + str(temp_h))
-        pixmap = pixmap.scaled(temp_w, temp_h)
-        self.image.setPixmap(pixmap)
-        print("Image width: " + str(self.image.width()))
-        print("Image height: " + str(self.image.height()))
-        self.image.setAlignment(Qt.Qt.AlignCenter)
+
+        print(file_name)
+        if(file_name != ""):
+            self.currentlyPresentedImageURL = file_name
+            print(self.currentlyPresentedImageURL)
+
+            pixmap = QPixmap(file_name)
+            temp_w = pixmap.width()
+            temp_h = pixmap.height()
+            print("width: " + str(temp_w))
+            print("height: " + str(temp_h))
+            temp_w, temp_h = self.resizeImage(pixmap.width(), pixmap.height())
+            print("After resize")
+            print("width: " + str(temp_w))
+            print("height: " + str(temp_h))
+            pixmap = pixmap.scaled(temp_w, temp_h)
+            self.image.setPixmap(pixmap)
+            print("Image width: " + str(self.image.width()))
+            print("Image height: " + str(self.image.height()))
+            self.image.setAlignment(Qt.Qt.AlignCenter)
+        else:
+            print("Nem nyitottál meg fájlt")
 
     def faceDetect(self):
         myScaleFactor = float(self.scaleFactorLineEdit.text())
         myMinNeighbors = int(self.minNeighborsLineEdit.text())
 
-
         print('Face')
-        file_path = "Resources/Photos/Face/lady.jpg"
+        file_path = self.currentlyPresentedImageURL
+        #file_path = "Resources/Photos/Face/lady.jpg"
 
         self.painter = QPainter(self.image)
-        # self.painter.setPen(QPen(Qt.red, 3, Qt.SolidLine))
 
         img = cv.imread(file_path)
-
         gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-
         haar_cascade = cv.CascadeClassifier('HaarCascade/haar_frontalface.xml')
 
         # rect = haar_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=3)
