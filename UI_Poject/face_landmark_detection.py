@@ -15,6 +15,12 @@ from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 from PyQt5.QtGui import QPixmap, QPainter
 from PyQt5.QtWidgets import QFileDialog
 
+import time
+
+import speech_recognition as sr
+
+import speech_recognizer_system
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -139,12 +145,12 @@ class Ui_MainWindow(object):
 
 
         #
-
         self.findButton.clicked.connect(self.openFile)
         self.detectLandmarkButton.clicked.connect(self.detectLandmark)
         self.minusButton.clicked.connect(self.minusButtonPush)
         self.plusButton.clicked.connect(self.plusButtonPush)
         self.backToMenuButton.clicked.connect(self.bactToMainMenu)
+        self.startRecognizer()
         #
 
         self.retranslateUi(MainWindow)
@@ -275,6 +281,45 @@ class Ui_MainWindow(object):
                     return width * multiplier, height * multiplier
 
 
+    def processSpeech(self, word):
+        if(word == "back" or word == "beck" or word == "Beck" or word == "Back"):
+            self.backToMenuButton.click()
+        elif(word == "plus" or word == "loose" or word == "Plus"):
+            self.plusButton.click()
+        elif "minus" in word or "-" in word:
+            self.minusButton.click()
+        elif "open" in word or "Open" in word:
+            self.findButton.click()
+        elif "detect" in word or "Detect" in word or "landmark" in word or "Landmark" in word:
+            self.detectLandmarkButton.click()
+
+
+    # this is called from the background thread
+    def callback(self, recognizer, audio):
+        # received audio data, now we'll recognize it using Google Speech Recognition
+        try:
+            # for testing purposes, we're just using the default API key
+            # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+            # instead of `r.recognize_google(audio)`
+            print("Google Speech Recognition thinks you said " + recognizer.recognize_google(audio))
+            self.processSpeech(recognizer.recognize_google(audio))
+            # self.backToMenuButton.click()
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+    def startRecognizer(self):
+        print("Start Recognizer")
+        r = sr.Recognizer()
+        m = sr.Microphone()
+        with m as source:
+            r.adjust_for_ambient_noise(source)
+        stop_listening = r.listen_in_background(m, self.callback)
+        # stop_listening(wait_for_stop=False)
+        # print("Stop Recognizer")
+
+
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
@@ -282,4 +327,5 @@ if __name__ == "__main__":
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
+
     sys.exit(app.exec_())
