@@ -9,17 +9,13 @@
 import dlib
 import cv2
 
-import main_menu
-
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
 from PyQt5.QtGui import QPixmap, QPainter
 from PyQt5.QtWidgets import QFileDialog
 
-import time
-
 import speech_recognition as sr
 
-import speech_recognizer_system
+import main_menu
 
 
 class Ui_MainWindow(object):
@@ -150,6 +146,7 @@ class Ui_MainWindow(object):
         self.minusButton.clicked.connect(self.minusButtonPush)
         self.plusButton.clicked.connect(self.plusButtonPush)
         self.backToMenuButton.clicked.connect(self.bactToMainMenu)
+        self.backToMenuButton.clicked.connect(MainWindow.close)
         self.startRecognizer()
         #
 
@@ -220,9 +217,10 @@ class Ui_MainWindow(object):
 
     def bactToMainMenu(self):
         print("Back")
-        u = main_menu.Ui_MainMenu()
-        u.setupUi(MainWindow)
-        MainWindow.show()
+        self.window1 = QtWidgets.QMainWindow()
+        self.ui = main_menu.Ui_MainWindow()
+        self.ui.setupUi(self.window1)
+        self.window1.show()
 
 
     def detectLandmark(self):

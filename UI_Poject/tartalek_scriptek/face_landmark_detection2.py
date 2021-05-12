@@ -9,10 +9,10 @@
 import dlib
 import cv2
 
-import main_menu
+from tartalek_scriptek import main_menu
 
 from PyQt5 import QtCore, QtGui, QtWidgets, Qt
-from PyQt5.QtGui import QPixmap, QPainter
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFileDialog
 
 

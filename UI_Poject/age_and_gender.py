@@ -15,6 +15,8 @@ from PyQt5.QtWidgets import QFileDialog
 
 import main_menu
 
+import speech_recognition as sr
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -81,7 +83,11 @@ class Ui_MainWindow(object):
         #
         self.openButton.clicked.connect(self.openFile)
         self.detectAgeAndGender.clicked.connect(self.detectAgeGender)
-        self.backToMenuButton.clicked.connect(self.bactToMainMenu)
+
+        self.backToMenuButton.clicked.connect(self.backToMainMenu)
+        self.backToMenuButton.clicked.connect(MainWindow.close)
+        #
+        self.startRecognizer()
         #
 
         self.retranslateUi(MainWindow)
@@ -93,6 +99,15 @@ class Ui_MainWindow(object):
         self.openButton.setText(_translate("MainWindow", "Open File"))
         self.detectAgeAndGender.setText(_translate("MainWindow", "Detect Age and Gender"))
         self.backToMenuButton.setText(_translate("MainWindow", "Back To Menu"))
+
+
+    def backToMainMenu(self):
+        print("Back")
+        self.window1 = QtWidgets.QMainWindow()
+        self.ui = main_menu.Ui_MainWindow()
+        self.ui.setupUi(self.window1)
+        self.window1.show()
+
 
     def resizeImage(self, width, height):
         new_width, new_height, multiplier = 0, 0, 0
@@ -141,7 +156,7 @@ class Ui_MainWindow(object):
         else:
             print("Nem nyitottál meg fájlt")
 
-    def highlightFace(net, frame, conf_threshold=0.7):
+    def highlightFace(self, net, frame, conf_threshold=0.7):
         frameOpencvDnn = frame.copy()
         frameHeight = frameOpencvDnn.shape[0]
         frameWidth = frameOpencvDnn.shape[1]
@@ -183,44 +198,84 @@ class Ui_MainWindow(object):
         ageNet = cv2.dnn.readNet(ageModel, ageProto)
         genderNet = cv2.dnn.readNet(genderModel, genderProto)
 
-        video = cv2.VideoCapture(args.image if args.image else 0)
+        # video=cv2.VideoCapture(args.image if args.image else 0)
+        video = cv2.VideoCapture(self.currentlyPresentedImageURL)
         padding = 20
         # while cv2.waitKey(1)<0 :
-        frame = cv2.imread('lady.jpg')
-        resultImg, faceBoxes = self.highlightFace(faceNet, frame)
-        if not faceBoxes:
-            print("No face detected")
+        while cv2.waitKey(1) < 0:
+            hasFrame, frame = video.read()
+            if not hasFrame:
+                cv2.waitKey()
+                break
 
-        for faceBox in faceBoxes:
-            face = frame[max(0, faceBox[1] - padding):
-                         min(faceBox[3] + padding, frame.shape[0] - 1), max(0, faceBox[0] - padding)
-                                                                        :min(faceBox[2] + padding, frame.shape[1] - 1)]
+            resultImg, faceBoxes = self.highlightFace(faceNet, frame)
+            if not faceBoxes:
+                print("No face detected")
 
-            blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
-            genderNet.setInput(blob)
-            genderPreds = genderNet.forward()
-            gender = genderList[genderPreds[0].argmax()]
-            print(f'Gender: {gender}')
+            for faceBox in faceBoxes:
+                face = frame[max(0, faceBox[1] - padding):
+                             min(faceBox[3] + padding, frame.shape[0] - 1), max(0, faceBox[0] - padding)
+                                                                            :min(faceBox[2] + padding,
+                                                                                 frame.shape[1] - 1)]
 
-            ageNet.setInput(blob)
-            agePreds = ageNet.forward()
-            age = ageList[agePreds[0].argmax()]
-            print(f'Age: {age[1:-1]} years')
+                blob = cv2.dnn.blobFromImage(face, 1.0, (227, 227), MODEL_MEAN_VALUES, swapRB=False)
+                genderNet.setInput(blob)
+                genderPreds = genderNet.forward()
+                gender = genderList[genderPreds[0].argmax()]
+                print(f'Gender: {gender}')
 
-            cv2.putText(resultImg, f'{gender}, {age}', (faceBox[0], faceBox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
-                        (0, 255, 255), 2, cv2.LINE_AA)
-            # cv2.imshow("Detecting age and gender", resultImg)
-            cv2.imwrite('done.jpg', resultImg)
-            done = cv2.imread('done.jpg')
-            cv2.imshow("Detecting age and gender", done)
+                ageNet.setInput(blob)
+                agePreds = ageNet.forward()
+                age = ageList[agePreds[0].argmax()]
+                print(f'Age: {age[1:-1]} years')
 
-        cv2.waitKey(0)
+                cv2.putText(resultImg, f'{gender}, {age}', (faceBox[0], faceBox[1] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.8,
+                            (0, 255, 255), 2, cv2.LINE_AA)
+                # cv2.imshow("Detecting age and gender", resultImg)
+                cv2.imwrite("AgeAndGenderRecognition/detected_age_and_gender.jpg", resultImg)
+                img = cv2.imread("AgeAndGenderRecognition/detected_age_and_gender.jpg")
+                self.pixmax = QtGui.QPixmap("AgeAndGenderRecognition/detected_age_and_gender.jpg")
+                temp_w, temp_h = self.resizeImage(self.pixmax.width(), self.pixmax.height())
+                self.pixmax = self.pixmax.scaled(temp_w.__int__(), temp_h.__int__())
+                self.image.setAlignment(Qt.Qt.AlignCenter)
+                self.image.setPixmap(self.pixmax)
+                cv2.waitKey(0)
 
-    def bactToMainMenu(self):
-        print("Back")
-        u = main_menu.Ui_MainMenu()
-        u.setupUi(MainWindow)
-        MainWindow.show()
+
+    def processSpeech(self, word):
+        if word == "back" or word == "beck" or word == "Beck" or word == "Back":
+            self.backToMenuButton.click()
+        elif "open" in word or "Open" in word:
+            self.openFile()
+        elif "detect" in word or "Detect" in word or "age" in word or "Age" in word \
+                or "gender" in word or "Gender" in word:
+            self.detectAgeAndGender.click()
+
+
+    # this is called from the background thread
+    def callback(self, recognizer, audio):
+        # received audio data, now we'll recognize it using Google Speech Recognition
+        try:
+            # for testing purposes, we're just using the default API key
+            # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+            # instead of `r.recognize_google(audio)`
+            print("Google Speech Recognition thinks you said " + recognizer.recognize_google(audio))
+            self.processSpeech(recognizer.recognize_google(audio))
+            # self.backToMenuButton.click()
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+    def startRecognizer(self):
+        print("Start Recognizer")
+        r = sr.Recognizer()
+        m = sr.Microphone()
+        with m as source:
+            r.adjust_for_ambient_noise(source)
+        stop_listening = r.listen_in_background(m, self.callback)
+        # stop_listening(wait_for_stop=False)
+        # print("Stop Recognizer")
 
 
 if __name__ == "__main__":

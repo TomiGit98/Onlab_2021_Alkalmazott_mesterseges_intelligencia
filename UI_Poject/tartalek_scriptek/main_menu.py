@@ -17,11 +17,11 @@ import facial_expressions_recognition
 import recognize_face
 import traind_model_to_recognize
 import tensorflow_neural_network_person
-import classification_tensorflow
 
 import time
 
 import speech_recognition as sr
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -30,9 +30,9 @@ class Ui_MainWindow(object):
         MainWindow.setStyleSheet("background-color: #252525")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.quitButton = QtWidgets.QPushButton(self.centralwidget)
-        self.quitButton.setGeometry(QtCore.QRect(300, 500, 171, 51))
-        self.quitButton.setStyleSheet("QPushButton#quitButton {\n"
+        self.scaleFactorMinusButton = QtWidgets.QPushButton(self.centralwidget)
+        self.scaleFactorMinusButton.setGeometry(QtCore.QRect(300, 480, 171, 51))
+        self.scaleFactorMinusButton.setStyleSheet("QPushButton#scaleFactorMinusButton {\n"
 "    background-color: red;\n"
 "    border-style: ;outset\n"
 "    border-width: 0px;\n"
@@ -42,10 +42,10 @@ class Ui_MainWindow(object):
 "    min-width: 2em;\n"
 "    padding: 6px;\n"
 "}")
-        self.quitButton.setIconSize(QtCore.QSize(40, 40))
-        self.quitButton.setObjectName("quitButton")
+        self.scaleFactorMinusButton.setIconSize(QtCore.QSize(40, 40))
+        self.scaleFactorMinusButton.setObjectName("scaleFactorMinusButton")
         self.detectBodyPart = QtWidgets.QPushButton(self.centralwidget)
-        self.detectBodyPart.setGeometry(QtCore.QRect(100, 90, 561, 41))
+        self.detectBodyPart.setGeometry(QtCore.QRect(100, 100, 561, 41))
         self.detectBodyPart.setStyleSheet("QPushButton#detectBodyPart {\n"
 "    background-color: #39FF14;\n"
 "    border-style: ;outset\n"
@@ -58,7 +58,7 @@ class Ui_MainWindow(object):
 "}")
         self.detectBodyPart.setObjectName("detectBodyPart")
         self.detectFaceCountures = QtWidgets.QPushButton(self.centralwidget)
-        self.detectFaceCountures.setGeometry(QtCore.QRect(100, 140, 561, 41))
+        self.detectFaceCountures.setGeometry(QtCore.QRect(100, 150, 561, 41))
         self.detectFaceCountures.setStyleSheet("QPushButton#detectFaceCountures {\n"
 "    background-color: #39FF14;\n"
 "    border-style: ;outset\n"
@@ -71,7 +71,7 @@ class Ui_MainWindow(object):
 "}")
         self.detectFaceCountures.setObjectName("detectFaceCountures")
         self.detectAgeAndGender = QtWidgets.QPushButton(self.centralwidget)
-        self.detectAgeAndGender.setGeometry(QtCore.QRect(100, 190, 561, 41))
+        self.detectAgeAndGender.setGeometry(QtCore.QRect(100, 200, 561, 41))
         self.detectAgeAndGender.setStyleSheet("QPushButton#detectAgeAndGender {\n"
 "    background-color: #39FF14;\n"
 "    border-style: ;outset\n"
@@ -84,7 +84,7 @@ class Ui_MainWindow(object):
 "}")
         self.detectAgeAndGender.setObjectName("detectAgeAndGender")
         self.detectFacialExpression = QtWidgets.QPushButton(self.centralwidget)
-        self.detectFacialExpression.setGeometry(QtCore.QRect(100, 240, 561, 41))
+        self.detectFacialExpression.setGeometry(QtCore.QRect(100, 250, 561, 41))
         self.detectFacialExpression.setStyleSheet("QPushButton#detectFacialExpression {\n"
 "    background-color: #39FF14;\n"
 "    border-style: ;outset\n"
@@ -97,7 +97,7 @@ class Ui_MainWindow(object):
 "}")
         self.detectFacialExpression.setObjectName("detectFacialExpression")
         self.recognizeFace = QtWidgets.QPushButton(self.centralwidget)
-        self.recognizeFace.setGeometry(QtCore.QRect(100, 340, 561, 41))
+        self.recognizeFace.setGeometry(QtCore.QRect(100, 300, 561, 41))
         self.recognizeFace.setStyleSheet("QPushButton#recognizeFace {\n"
 "    background-color: #39FF14;\n"
 "    border-style: ;outset\n"
@@ -110,7 +110,7 @@ class Ui_MainWindow(object):
 "}")
         self.recognizeFace.setObjectName("recognizeFace")
         self.tensorflowRun = QtWidgets.QPushButton(self.centralwidget)
-        self.tensorflowRun.setGeometry(QtCore.QRect(100, 440, 561, 41))
+        self.tensorflowRun.setGeometry(QtCore.QRect(100, 400, 561, 41))
         self.tensorflowRun.setStyleSheet("QPushButton#tensorflowRun {\n"
 "    background-color: #39FF14;\n"
 "    border-style: ;outset\n"
@@ -123,7 +123,7 @@ class Ui_MainWindow(object):
 "}")
         self.tensorflowRun.setObjectName("tensorflowRun")
         self.classification = QtWidgets.QPushButton(self.centralwidget)
-        self.classification.setGeometry(QtCore.QRect(100, 390, 561, 41))
+        self.classification.setGeometry(QtCore.QRect(100, 350, 561, 41))
         self.classification.setStyleSheet("QPushButton#classification {\n"
 "    background-color: #39FF14;\n"
 "    border-style: ;outset\n"
@@ -140,13 +140,7 @@ class Ui_MainWindow(object):
         font = QtGui.QFont()
         font.setPointSize(28)
         self.labelAnalyze.setFont(font)
-        self.labelAnalyze.setStyleSheet("")
-        self.labelAnalyze.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.labelAnalyze.setAlignment(QtCore.Qt.AlignCenter)
-        self.labelAnalyze.setObjectName("labelAnalyze")
-        self.trainFaceRecognition = QtWidgets.QPushButton(self.centralwidget)
-        self.trainFaceRecognition.setGeometry(QtCore.QRect(100, 290, 561, 41))
-        self.trainFaceRecognition.setStyleSheet("QPushButton#trainFaceRecognition {\n"
+        self.labelAnalyze.setStyleSheet("QPushButton#label {\n"
 "    background-color: #39FF14;\n"
 "    border-style: ;outset\n"
 "    border-width: 0px;\n"
@@ -156,7 +150,9 @@ class Ui_MainWindow(object):
 "    min-width: 2em;\n"
 "    padding: 6px;\n"
 "}")
-        self.trainFaceRecognition.setObjectName("trainFaceRecognition")
+        self.labelAnalyze.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.labelAnalyze.setAlignment(QtCore.Qt.AlignCenter)
+        self.labelAnalyze.setObjectName("labelAnalyze")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 760, 26))
@@ -166,9 +162,8 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-
         #
-        # self.backToMenuButton.clicked.click(self.bactToMainMenu)
+        #self.backToMenuButton.clicked.click(self.bactToMainMenu)
         self.detectFaceCountures.clicked.connect(self.DetectLandmark)
         self.detectFaceCountures.clicked.connect(MainWindow.close)
 
@@ -190,15 +185,11 @@ class Ui_MainWindow(object):
         self.tensorflowRun.clicked.connect(self.TensorflowPersonDetection)
         self.tensorflowRun.clicked.connect(MainWindow.close)
 
-        self.trainFaceRecognition.clicked.connect(self.TrainFaceRecognizer)
-        self.trainFaceRecognition.clicked.connect(MainWindow.close)
-
-        self.quitButton.clicked.connect(MainWindow.close)
+        self.scaleFactorMinusButton.clicked.connect(MainWindow.close)
 
         #
         self.startRecognizer()
         #
-
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -206,7 +197,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-        self.quitButton.setText(_translate("MainWindow", "Quit"))
+        self.scaleFactorMinusButton.setText(_translate("MainWindow", "Quit"))
         self.detectBodyPart.setText(_translate("MainWindow", "Detect Body Part"))
         self.detectFaceCountures.setText(_translate("MainWindow", "Detect Face Counture"))
         self.detectAgeAndGender.setText(_translate("MainWindow", "Detect Age and Gender"))
@@ -215,7 +206,7 @@ class Ui_MainWindow(object):
         self.tensorflowRun.setText(_translate("MainWindow", "Neural Network object detection"))
         self.classification.setText(_translate("MainWindow", "Classification"))
         self.labelAnalyze.setText(_translate("MainWindow", "Analysis"))
-        self.trainFaceRecognition.setText(_translate("MainWindow", "Train Face Model"))
+
 
         self.labelAnalyze.setText("<font color='red'>Analysis</font>")
 
@@ -255,7 +246,7 @@ class Ui_MainWindow(object):
 
     def Classification(self):
         self.windowClassification = QtWidgets.QMainWindow()
-        self.ui = classification_tensorflow.Ui_MainWindow()
+        self.ui = traind_model_to_recognize.Ui_MainWindow()
         self.ui.setupUi(self.windowClassification)
         self.windowClassification.show()
 
@@ -265,11 +256,6 @@ class Ui_MainWindow(object):
         self.ui.setupUi(self.windowTensorflowPersonDetection)
         self.windowTensorflowPersonDetection.show()
 
-    def TrainFaceRecognizer(self):
-        self.windowTrainFaceRecognizer = QtWidgets.QMainWindow()
-        self.ui = traind_model_to_recognize.Ui_MainWindow()
-        self.ui.setupUi(self.windowTrainFaceRecognizer)
-        self.windowTrainFaceRecognizer.show()
 
     def processSpeech(self, word):
         if word == "body" or word == "Body":
@@ -314,6 +300,8 @@ class Ui_MainWindow(object):
         stop_listening = r.listen_in_background(m, self.callback)
         # stop_listening(wait_for_stop=False)
         # print("Stop Recognizer")
+
+
 
 
 if __name__ == "__main__":

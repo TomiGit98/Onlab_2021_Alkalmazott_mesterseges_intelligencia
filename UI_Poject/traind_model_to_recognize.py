@@ -17,6 +17,9 @@ from PyQt5.QtCore import Qt
 
 import main_menu
 
+import speech_recognition as sr
+
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -83,7 +86,11 @@ class Ui_MainWindow(object):
 
         #
         self.trainButton.clicked.connect(self.trainDatasets)
+
         self.backToMenuButton.clicked.connect(self.backToMainMenu)
+        self.backToMenuButton.clicked.connect(MainWindow.close)
+        #
+        self.startRecognizer()
         #
 
         self.retranslateUi(MainWindow)
@@ -97,9 +104,10 @@ class Ui_MainWindow(object):
 
     def backToMainMenu(self):
         print("Back")
-        u = main_menu.Ui_MainMenu()
-        u.setupUi(MainWindow)
-        MainWindow.show()
+        self.window1 = QtWidgets.QMainWindow()
+        self.ui = main_menu.Ui_MainWindow()
+        self.ui.setupUi(self.window1)
+        self.window1.show()
 
     def trainDatasets(self):
         # Initialize names and path to empty list
@@ -145,6 +153,38 @@ class Ui_MainWindow(object):
         trainer.train(faces, ids)
         trainer.write("training.yml")
         print("traning.yml")
+
+    def processSpeech(self, word):
+        if word == "back" or word == "beck" or word == "Beck" or word == "Back":
+            self.backToMenuButton.click()
+        elif "train" in word or "Train" in word:
+            self.trainButton.click()
+
+
+    # this is called from the background thread
+    def callback(self, recognizer, audio):
+        # received audio data, now we'll recognize it using Google Speech Recognition
+        try:
+            # for testing purposes, we're just using the default API key
+            # to use another API key, use `r.recognize_google(audio, key="GOOGLE_SPEECH_RECOGNITION_API_KEY")`
+            # instead of `r.recognize_google(audio)`
+            print("Google Speech Recognition thinks you said " + recognizer.recognize_google(audio))
+            self.processSpeech(recognizer.recognize_google(audio))
+            # self.backToMenuButton.click()
+        except sr.UnknownValueError:
+            print("Google Speech Recognition could not understand audio")
+        except sr.RequestError as e:
+            print("Could not request results from Google Speech Recognition service; {0}".format(e))
+
+    def startRecognizer(self):
+        print("Start Recognizer")
+        r = sr.Recognizer()
+        m = sr.Microphone()
+        with m as source:
+            r.adjust_for_ambient_noise(source)
+        stop_listening = r.listen_in_background(m, self.callback)
+        # stop_listening(wait_for_stop=False)
+        # print("Stop Recognizer")
 
 
 if __name__ == "__main__":
